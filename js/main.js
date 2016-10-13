@@ -58,7 +58,7 @@ Crafty.e("rScore, DOM, 2D, Text")
 // Puck //
 //////////
 Crafty.sprite("images/pluck.png", {pluck:[0,0,20,20]});
-Crafty.e("pluck, DOM, Collision")
+Crafty.e("Pluck, pluck, DOM, Collision")
 	.attr({
 		x:300,
 		y:300,
@@ -92,11 +92,6 @@ Crafty.e("pluck, DOM, Collision")
 		this.x += this.dX;
 		this.y += this.dY;
 	})
-	.onHit("Bat", function(){
-		dm = getDificultyMultiplier();
-		ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2)*dm;
-		this.dX = ndX < 9*dm ? ndX : ndX/2;
-	})
 	.onHit("lGoal", function(){
 		this.x = width/2;
 		this.y = height/2;
@@ -129,6 +124,16 @@ Crafty.e("pBat, Bat, 2D, DOM, Color, Collision")
 		y:200,
 		w:40,
 		h:40,
+	})
+	.checkHits("Pluck")
+	.bind("HitOn", function(){
+		pluck = Crafty("pluck");
+		if(this._x < pluck._x && this._x+this._w > pluck._x){
+			pluck.dY *=-1;
+		}
+		else if(this._y < pluck._y && this._y+this._h > pluck._y){
+			pluck.dX *=-1;
+		}
 	});
 
 /////////////////////
@@ -143,7 +148,7 @@ Crafty.e("pBatArea, 2D, DOM, Mouse")
 	})
 	.bind("MouseMove", function(){
 		pBat = Crafty("pBat");
-		pBat.x = Crafty.mousePos.x-20;
+		pBat.x = Crafty.mousePos.x+40;
 		pBat.y = Crafty.mousePos.y-20;
 	});
 
@@ -170,14 +175,21 @@ Crafty.e("Bat, 2D, DOM, Color, Collision")
 		this.y += direction * dSpeed * speedMultiplier;
 
 
+	})
+	.checkHits("Pluck")
+	.bind("HitOn", function(){
+		pluck = Crafty("pluck");
+		if(this._x < pluck._x && this._x+this._w > pluck._x){
+			pluck.dY *=-1;
+		}
+		else if(this._y < pluck._y && this._y+this._h > pluck._y){
+			pluck.dX *=-1;
+		}
 	});
 
 	function getDificultyMultiplier(){
 		rScore = Crafty("rScore").score > 0 ? Crafty("rScore").score : 1;
 		lScore = Crafty("lScore").score > 0 ? Crafty("lScore").score : 1;
 		dificultyMultiplier = lScore/rScore;
-		console.info(rScore);
-		console.warn(lScore);
-		console.log(dificultyMultiplier);
 		return 0.9 + dificultyMultiplier * 0.1;
 	}
