@@ -37,7 +37,7 @@ Crafty.e("rGoal, 2D, DOM, Collision")
 // Left Score //
 ////////////////
 Crafty.e("lScore, DOM, 2D, Text")
-    .attr({ x: 40, y: 95, w: 2, h: 2, score: 0 })
+    .attr({ x: 40, y: 95, w: width/2, h: height, score: 0 })
     .text("0")
     .textColor('rgba(0,0,0,0.2)')
     .textFont({size:"400px", weight:"bold"})
@@ -47,12 +47,12 @@ Crafty.e("lScore, DOM, 2D, Text")
 // Right Score //
 /////////////////
 Crafty.e("rScore, DOM, 2D, Text")
-    .attr({ x: width-310, y: 95, w: 2, h: 2, score: 0 })
+    .attr({ x: width-500, y: 95, w: width/2, h: height, score: 0 })
     .text("0")
+    .css({ "text-align": "right"})
     .textColor('rgba(0,0,0,0.2)')
     .textFont({size:"400px", weight:"bold"})
     .unselectable();
-
 
 //////////
 // Puck //
@@ -71,28 +71,37 @@ Crafty.e("pluck, DOM, Collision")
 	.bind("EnterFrame", function(){
 
 		if(this.y < 30 || this.y >height-50){
-			ndY = this.dY * Crafty.math.randomNumber(-0.8,-1.2);
-			this.dY = ndY < 9 ? ndY : ndY/2;
+			dm = getDificultyMultiplier();
+			ndY = this.dY * Crafty.math.randomNumber(-0.8,-1.2)*dm;
+			this.dY = ndY < 9*dm ? ndY : ndY/2;
 		}
 
 		if(this.x < 30 || this.x >width-50){
 			if(this.y<220 || this.y>440){
-				ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2);
-				this.dX = ndX < 9 ? ndX : ndX/2;
+				dm = getDificultyMultiplier();
+				ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2)*dm;
+				this.dX = ndX < 9*dm ? ndX : ndX/2;
 			}
 		}
+
+		if(this.y < 0 || this.y > height || this.x < 0 || this.x > width){
+			this.x = width/2;
+			this.y = height/2;
+		}
+
 		this.x += this.dX;
 		this.y += this.dY;
 	})
 	.onHit("Bat", function(){
-		ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2);
-		this.dX = ndX < 9 ? ndX : ndX/2;
+		dm = getDificultyMultiplier();
+		ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2)*dm;
+		this.dX = ndX < 9*dm ? ndX : ndX/2;
 	})
 	.onHit("lGoal", function(){
 		this.x = width/2;
 		this.y = height/2;
 		this.dX *=-1;
-		Crafty("lScore").each(function(){
+		Crafty("rScore").each(function(){
 			this.score++;
 			this.text(this.score);
 		});
@@ -101,7 +110,7 @@ Crafty.e("pluck, DOM, Collision")
 		this.x = width/2;
 		this.y = height/2;
 		this.dX *=-1;
-		Crafty("rScore").each(function(){
+		Crafty("lScore").each(function(){
 			this.score++;
 			this.text(this.score);
 
@@ -153,7 +162,7 @@ Crafty.e("Bat, 2D, DOM, Color, Collision")
 		pluck = Crafty("pluck");
 		rScore = Crafty("rScore").score > 0 ? Crafty("rScore").score : 1;
 		lScore = Crafty("lScore").score > 0 ? Crafty("lScore").score : 1;
-		speedMultiplier = rScore/lScore;
+		speedMultiplier = lScore/rScore;
 		dSpeed = Crafty.math.randomNumber(0.5, 1);
 
 		direction = (pluck.y - this.y)/Math.abs(pluck.y - this.y);
@@ -162,3 +171,13 @@ Crafty.e("Bat, 2D, DOM, Color, Collision")
 
 
 	});
+
+	function getDificultyMultiplier(){
+		rScore = Crafty("rScore").score > 0 ? Crafty("rScore").score : 1;
+		lScore = Crafty("lScore").score > 0 ? Crafty("lScore").score : 1;
+		dificultyMultiplier = lScore/rScore;
+		console.info(rScore);
+		console.warn(lScore);
+		console.log(dificultyMultiplier);
+		return 0.9 + dificultyMultiplier * 0.1;
+	}
