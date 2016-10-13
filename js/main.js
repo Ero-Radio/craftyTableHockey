@@ -13,8 +13,7 @@ var goalHeight = 200;
 ///////////////
 // Left goal //
 ///////////////
-Crafty.e("lGoal, 2D, DOM, Collision, Color")
-	.color("rgb(255,255,0)")
+Crafty.e("lGoal, 2D, DOM, Collision")
 	.attr({
 		x:10,
 		y:220,
@@ -26,8 +25,7 @@ Crafty.e("lGoal, 2D, DOM, Collision, Color")
 ////////////////
 // Right Goal //
 ////////////////
-Crafty.e("rGoal, 2D, DOM, Collision, Color")
-	.color("rgb(255,255,0)")
+Crafty.e("rGoal, 2D, DOM, Collision")
 	.attr({
 		x:width-goalWidth-10,
 		y:220,
@@ -59,28 +57,28 @@ Crafty.e("rScore, DOM, 2D, Text")
 //////////
 // Puck //
 //////////
-Crafty.e("2D, DOM, Color, Collision")
-	.color("rgb(255,0,255)")
+Crafty.sprite("images/pluck.png", {pluck:[0,0,20,20]});
+Crafty.e("pluck, DOM, Collision")
 	.attr({
 		x:300,
 		y:300,
 		w:20,
 		h:20,
-		dX: Crafty.math.randomNumber(1,5),
-		dY: Crafty.math.randomNumber(1,5),
+		dX: Crafty.math.randomNumber(2,7),
+		dY: Crafty.math.randomNumber(2,7),
 
 	})
 	.bind("EnterFrame", function(){
 
 		if(this.y < 30 || this.y >height-50){
 			ndY = this.dY * Crafty.math.randomNumber(-0.8,-1.2);
-			this.dY = ndY < 6.1 ? ndY : ndY/2;
+			this.dY = ndY < 9 ? ndY : ndY/2;
 		}
 
 		if(this.x < 30 || this.x >width-50){
 			if(this.y<220 || this.y>440){
 				ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2);
-				this.dX = ndX < 6.1 ? ndX : ndX/2;
+				this.dX = ndX < 9 ? ndX : ndX/2;
 			}
 		}
 		this.x += this.dX;
@@ -88,7 +86,7 @@ Crafty.e("2D, DOM, Color, Collision")
 	})
 	.onHit("Bat", function(){
 		ndX = this.dX * Crafty.math.randomNumber(-0.8,-1.2);
-		this.dX = ndX < 6.1 ? ndX : ndX/2;
+		this.dX = ndX < 9 ? ndX : ndX/2;
 	})
 	.onHit("lGoal", function(){
 		this.x = width/2;
@@ -150,4 +148,17 @@ Crafty.e("Bat, 2D, DOM, Color, Collision")
 		y:200,
 		w:40,
 		h:40,
+	})
+	.bind("EnterFrame", function(){
+		pluck = Crafty("pluck");
+		rScore = Crafty("rScore").score > 0 ? Crafty("rScore").score : 1;
+		lScore = Crafty("lScore").score > 0 ? Crafty("lScore").score : 1;
+		speedMultiplier = rScore/lScore;
+		dSpeed = Crafty.math.randomNumber(0.5, 1);
+
+		direction = (pluck.y - this.y)/Math.abs(pluck.y - this.y);
+
+		this.y += direction * dSpeed * speedMultiplier;
+
+
 	});
